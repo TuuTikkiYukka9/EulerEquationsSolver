@@ -1,6 +1,0 @@
-﻿  Solver.cpp
-c:\users\julia\desktop\visua lstudio projects\new_avgust\godunov_and_asum\godunov_and_asum\strconvert.h(16): warning C4018: '<': signed/unsigned mismatch
-c:\users\julia\desktop\visua lstudio projects\new_avgust\godunov_and_asum\godunov_and_asum\strconvert.h(25): warning C4018: '<': signed/unsigned mismatch
-c:\users\julia\desktop\visua lstudio projects\new_avgust\godunov_and_asum\godunov_and_asum\strconvert.h(26): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-  Godunov_and_ASUM.vcxproj -> C:\Users\Julia\Desktop\Visua lStudio Projects\new_avgust\Godunov_and_ASUM\Debug\Godunov_and_ASUM.exe
-  Godunov_and_ASUM.vcxproj -> C:\Users\Julia\Desktop\Visua lStudio Projects\new_avgust\Godunov_and_ASUM\Debug\Godunov_and_ASUM.pdb (Partial PDB)
