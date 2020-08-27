@@ -1,5 +1,4 @@
 #include "Solver.h"
-#include "strConvert.h"
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -41,13 +40,13 @@ void Solver::token(std::string str) {
 
 
 	if (ls.size() == 3) {
-		if (ls[0] == "x_0") x0 = to_double(ls[2]);
-		if (ls[0] == "l.ro") kr_l.ro = to_double(ls[2]);
-		if (ls[0] == "l.u") kr_l.u = to_double(ls[2]);
-		if (ls[0] == "l.p") kr_l.p = to_double(ls[2]);
-		if (ls[0] == "r.ro") kr_r.ro = to_double(ls[2]);
-		if (ls[0] == "r.u") kr_r.u = to_double(ls[2]);
-		if (ls[0] == "r.p") kr_r.p = to_double(ls[2]);
+		if (ls[0] == "x_0") x0 = std::stod(ls[2]);
+		if (ls[0] == "l.ro") kr_l.ro = std::stod(ls[2]);
+		if (ls[0] == "l.u") kr_l.u = std::stod(ls[2]);
+		if (ls[0] == "l.p") kr_l.p = std::stod(ls[2]);
+		if (ls[0] == "r.ro") kr_r.ro = std::stod(ls[2]);
+		if (ls[0] == "r.u") kr_r.u = std::stod(ls[2]);
+		if (ls[0] == "r.p") kr_r.p = std::stod(ls[2]);
 	}
 }
 

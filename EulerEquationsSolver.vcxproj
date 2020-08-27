@@ -123,9 +123,7 @@
   <ItemGroup>
     <ClInclude Include="ASUM.h" />
     <ClInclude Include="Godunov.h" />
-    <ClInclude Include="math2.h" />
     <ClInclude Include="Solver.h" />
-    <ClInclude Include="strConvert.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

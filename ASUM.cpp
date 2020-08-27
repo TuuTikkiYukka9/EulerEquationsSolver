@@ -1,5 +1,4 @@
 #include "ASUM.h"
-#include "math2.h"
 #include <iostream>
 #include <fstream>
 #include <iomanip>

@@ -9,7 +9,7 @@
 using namespace std;
 
 int main() {
-	std::string name_file = "in.txt";
+	std::string name_file = "input\\input.txt";
 
 	int ch = 5;
 	while (ch != 3) {

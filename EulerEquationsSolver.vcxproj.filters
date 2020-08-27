@@ -38,11 +38,5 @@
     <ClInclude Include="ASUM.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="math2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="strConvert.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>
