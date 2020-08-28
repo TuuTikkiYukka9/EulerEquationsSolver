@@ -115,15 +115,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ASUM.cpp" />
-    <ClCompile Include="Godunov.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="Solver.cpp" />
+    <ClCompile Include="src\asum.cpp" />
+    <ClCompile Include="src\godunov.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\solver.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ASUM.h" />
-    <ClInclude Include="Godunov.h" />
-    <ClInclude Include="Solver.h" />
+    <ClInclude Include="src\asum.h" />
+    <ClInclude Include="src\godunov.h" />
+    <ClInclude Include="src\solver.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -15,27 +15,27 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Resource Files</Filter>
+    <ClCompile Include="src\asum.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Godunov.cpp">
-      <Filter>Resource Files</Filter>
+    <ClCompile Include="src\godunov.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Solver.cpp">
-      <Filter>Resource Files</Filter>
+    <ClCompile Include="src\main.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ASUM.cpp">
-      <Filter>Resource Files</Filter>
+    <ClCompile Include="src\solver.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Solver.h">
+    <ClInclude Include="src\asum.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Godunov.h">
+    <ClInclude Include="src\godunov.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ASUM.h">
+    <ClInclude Include="src\solver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
