@@ -38,5 +38,17 @@
     <ClInclude Include="src\solver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\equationsystemreader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\iequationsystemreader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\solutionwriter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\isolutionwriter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -3,6 +3,8 @@
 #include <fstream>
 #include <iomanip>
 #include <string>
+#include "solutionwriter.h"
+
 
 using namespace std;
 
@@ -24,9 +26,9 @@ Godunov::Godunov(void)
 
 }
 
-Perem Godunov::solver_riman(Perem U_L, Perem U_R) {
+Variables Godunov::solver_riman(Variables U_L, Variables U_R) {
 	double gam = 1.4;
-	struct Perem U;
+	struct Variables U;
 	double c_L = 1;
 	double c_R = 1;
 	double Ro;
@@ -143,9 +145,9 @@ void Godunov::solver(double *ro, double *u, double *p, int n1) {
 				F_minus.F3 = u[i] * (p[i] + E);
 			}
 			else {
-				Perem U_L = { ro[i - 1], u[i - 1], p[i - 1] };
-				Perem U_R = { ro[i], u[i], p[i] };
-				Perem U_res;
+				Variables U_L = { ro[i - 1], u[i - 1], p[i - 1] };
+				Variables U_R = { ro[i], u[i], p[i] };
+				Variables U_res;
 				U_res = solver_riman(U_L, U_R);
 
 				E = (U_res.p / (gam - 1)) + 0.5*U_res.ro*pow(U_res.u, 2);
@@ -165,9 +167,9 @@ void Godunov::solver(double *ro, double *u, double *p, int n1) {
 				F_plus.F3 = u[i] * (p[i] + E);
 			}
 			else {
-				Perem U_L = { ro[i], u[i], p[i] };
-				Perem U_R = { ro[i + 1], u[i + 1], p[i + 1] };
-				Perem U_res;
+				Variables U_L = { ro[i], u[i], p[i] };
+				Variables U_R = { ro[i + 1], u[i + 1], p[i + 1] };
+				Variables U_res;
 				U_res = solver_riman(U_L, U_R);
 
 				E = (U_res.p / (gam - 1)) + 0.5*U_res.ro*pow(U_res.u, 2);
@@ -269,8 +271,7 @@ void Godunov::solve() {
 	cout << "\n \t T: " << T_vsego << "\n\n\n";
 
 	//----------------------Testing----------------------------------------//
-	this->print("Godunov", ro, u, p, n1);
-
+	(new SolutionWriter())->write("Godunov", ro, u, p, n1);
 
 	delete[]ro;
 	delete[]u;

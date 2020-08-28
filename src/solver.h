@@ -1,7 +1,12 @@
 #pragma once
 #include<string>
 
-struct Perem {
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <vector>
+
+struct Variables {
 	double ro;
 	double u;
 	double p;
@@ -19,11 +24,20 @@ struct potoc {
 	double F3;
 };
 
+struct EquationSystem
+{
+	Variables leftBoundaryCondition;
+	Variables rightBoundaryCondition;
+	double x0;
+	double maxX;
+	double minX;
+};
+
 class Solver
 {
 protected:
-	Perem kr_l;
-	Perem kr_r;
+	Variables kr_l;
+	Variables kr_r;
 	double x0;
 	int N, K;
 
@@ -33,13 +47,7 @@ protected:
 	double min_x;
 
 public:
-	int metod;
-	Solver();
-	void read_file(std::string name_file);//сделать их виртуальнами
 	void virtual solve() {}
-	void print(std::string name_metod, double *ro, double *u, double *p, int n1);
-	void convert(std::string name_metod);
-	void token(std::string str);
-	~Solver();
+	void init(EquationSystem &eq);
 };
 

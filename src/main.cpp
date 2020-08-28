@@ -4,13 +4,15 @@
 #include"Solver.h"
 #include "ASUM.h"
 #include "Godunov.h"
+#include "equationsystemreader.h"
 
 
 using namespace std;
 
 int main() {
 	std::string name_file = "input\\input.txt";
-
+	IEquationSystemReader *equationSystemReader = new EquationSystemReader();
+	EquationSystem eq = equationSystemReader->readFile(name_file);
 	int ch = 5;
 	while (ch != 3) {
 		cout << "Menu: \n";
@@ -26,17 +28,18 @@ int main() {
 			//getline(cin, name_file);
 			cin >> name_file;
 			cout << "\n file name: " << name_file << "\n";
+			eq = equationSystemReader->readFile(name_file);
 		}
 		else if (ch == 0) {
 			Godunov a;
 			ptr = &a;
-			ptr->read_file(name_file);
+			ptr->init(eq);
 			ptr->solve();
 		}
 		else if (ch == 1) {
 			ASUM a;
 			ptr = &a;
-			ptr->read_file(name_file);
+			ptr->init(eq);
 			ptr->solve();
 		}
 		else if (ch == 3) {

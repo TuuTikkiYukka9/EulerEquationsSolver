@@ -9,7 +9,7 @@ public:
 	Godunov();
 	~Godunov();
 
-	Perem solver_riman(Perem U_L, Perem U_R);
+	Variables solver_riman(Variables U_L, Variables U_R);
 	void solve();
 	void solver(double *ro, double *u, double *p, int n1);
 

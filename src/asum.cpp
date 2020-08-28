@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iomanip>
 #include <string>
+#include "solutionwriter.h"
 
 using namespace std;
 ASUM::ASUM()
@@ -218,8 +219,7 @@ void ASUM::solve() {
 	}
 
 	//----------------------Testing----------------------------------------//
-	this->print("AUSM", ro[nk-1], u[nk-1], p[nk-1], n1);
-
+	(new SolutionWriter())->write("AUSM", ro[nk - 1], u[nk - 1], p[nk - 1], n1);
 
 	for (int k = 0;k<nk;k++) {
 		delete[]ro[k];
