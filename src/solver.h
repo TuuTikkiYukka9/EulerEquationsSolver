@@ -36,15 +36,15 @@ struct EquationSystem
 class Solver
 {
 protected:
-	Variables kr_l;
-	Variables kr_r;
+	Variables bcLeft;
+	Variables bcRight;
 	double x0;
 	int N, K;
 
-	double h, tau, max_T;
+	double h, tau, maxT;
 
-	double max_x;
-	double min_x;
+	double maxX;
+	double minX;
 
 public:
 	void virtual solve() {}

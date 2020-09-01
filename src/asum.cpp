@@ -8,8 +8,8 @@
 using namespace std;
 ASUM::ASUM()
 {
-	min_x = 0.0;
-	max_x = 1.0;
+	minX = 0.0;
+	maxX = 1.0;
 
 	double Kur = 2;
 	while (Kur>1.0) {
@@ -18,9 +18,9 @@ ASUM::ASUM()
 		cout << "Enter the number of partitions for t:";
 		cin >> K;
 		cout << "Enter max T:";
-		cin >> max_T;
-		h = (max_x - min_x) / N;
-		tau = (max_T) / K;
+		cin >> maxT;
+		h = (maxX - minX) / N;
+		tau = (maxT) / K;
 		Kur = (tau) / (2 * h);
 		cout << "chislo_Kuranta:" << Kur << "\n";
 	}
@@ -77,18 +77,18 @@ void ASUM::solve() {
 	double m_plus, m_minus;
 	double p_plus, p_minus;
 
-	double p_L = kr_l.p, ro_L = kr_l.ro, u_L = kr_l.u;//вот это надо считывать из файла
-	double p_R = kr_r.p, ro_R = kr_r.ro, u_R = kr_r.u;
+	double p_L = bcLeft.p, ro_L = bcLeft.ro, u_L = bcLeft.u;//вот это надо считывать из файла
+	double p_R = bcRight.p, ro_R = bcRight.ro, u_R = bcRight.u;
 	double x_0 = x0;
 	
 	//начальное усдловие
 	for (int i = 0; i < n1; i++) {
-		if ((min_x + (h*i))<x_0) {
+		if ((minX + (h*i))<x_0) {
 			p[0][i] = p_L;
 			ro[0][i] = ro_L;
 			u[0][i] = u_L;
 		}
-		else if ((min_x + (h*i))>x_0) {
+		else if ((minX + (h*i))>x_0) {
 			p[0][i] = p_R;
 			ro[0][i] = ro_R;
 			u[0][i] = u_R;
@@ -219,7 +219,7 @@ void ASUM::solve() {
 	}
 
 	//----------------------Testing----------------------------------------//
-	(new SolutionWriter())->write("AUSM", ro[nk - 1], u[nk - 1], p[nk - 1], n1);
+	//(new SolutionWriter())->write("AUSM", ro[nk - 1], u[nk - 1], p[nk - 1], n1);
 
 	for (int k = 0;k<nk;k++) {
 		delete[]ro[k];

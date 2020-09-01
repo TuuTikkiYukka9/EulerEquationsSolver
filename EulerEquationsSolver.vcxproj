@@ -121,6 +121,7 @@
     <ClCompile Include="src\solver.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\array.h" />
     <ClInclude Include="src\asum.h" />
     <ClInclude Include="src\equationsystemreader.h" />
     <ClInclude Include="src\godunov.h" />

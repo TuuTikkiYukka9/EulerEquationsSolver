@@ -1,10 +1,10 @@
 #include "Solver.h"
 
 void Solver::init(EquationSystem &eq) {
-	kr_l = eq.leftBoundaryCondition;
-	kr_r = eq.rightBoundaryCondition;
+	bcLeft = eq.leftBoundaryCondition;
+	bcRight = eq.rightBoundaryCondition;
 	x0 = eq.x0;
-	max_x = eq.maxX;
-	min_x = eq.minX;
+	maxX = eq.maxX;
+	minX = eq.minX;
 };
 

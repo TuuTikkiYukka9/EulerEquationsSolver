@@ -1,6 +1,7 @@
 #pragma once
 #include "isolutionwriter.h"
 #include <string>
+#include "array.h"
 
 class SolutionWriter : public ISolutionWriter {
 private:
@@ -12,12 +13,12 @@ private:
 		return str;
 	};
 
-	void writeFile(std::string fileName, double *values, int size) {
+	void writeFile(std::string fileName, Array<double> &values) {
 		using namespace std;
 		
 		ofstream fileStream(fileName);
 		
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < values.length(); i++) {
 			fileStream << setw(8) << right << convertDoubleToString(values[i]) << "\t";
 		}
 		fileStream << '\n';
@@ -25,7 +26,7 @@ private:
 	};
 
 public:
-	void write(std::string methodName, double *ro, double *u, double *p, int size) {
+	void write(std::string methodName, Array<double> &ro, Array<double> &u, Array<double> &p) {
 		using namespace std;
 
 		std::string uFileName, pFileName, roFilrName;
@@ -34,9 +35,9 @@ public:
 		pFileName = "p_" + methodName + ".xls";
 		roFilrName = "ro_" + methodName + ".xls";
 
-		writeFile(uFileName, u, size);
-		writeFile(pFileName, p, size);
-		writeFile(roFilrName, ro, size);
+		writeFile(uFileName, u);
+		writeFile(pFileName, p);
+		writeFile(roFilrName, ro);
 	};
 
 };

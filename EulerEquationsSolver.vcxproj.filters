@@ -50,5 +50,8 @@
     <ClInclude Include="src\isolutionwriter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\array.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

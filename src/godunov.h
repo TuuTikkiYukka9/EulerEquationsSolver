@@ -1,26 +1,20 @@
 #pragma once
 #include "Solver.h"
+#include "array.h"
 
 class Godunov : public Solver
 {
-	double D_R;
-	double D_L;
+	double rightD;
+	double leftD;
 public:
 	Godunov();
 	~Godunov();
 
 	Variables solver_riman(Variables U_L, Variables U_R);
 	void solve();
-	void solver(double *ro, double *u, double *p, int n1);
-
-	double max(double *u, int n1) {
-		if (n1 == 0) return 0;//тут исключение
-		double m = u[0];
-		for (int i = 1;i<n1;i++) {
-			if (u[i]>m) m = u[i];
-		}
-		return m;
-	}
+	void solver(Array<double> &ro, Array<double> &u, Array<double> &p, int n1);
+	void setBoundaryConditions(Array<double> &ro, Array<double> &u, Array<double> &p, Variables &left, Variables &right);
+	void setInitialConditions(Array<double> &ro, Array<double> &u, Array<double> &p, double x0, Variables &left, Variables &right);
 
 	double max(double a, double b) {
 		if (a>b) return a;

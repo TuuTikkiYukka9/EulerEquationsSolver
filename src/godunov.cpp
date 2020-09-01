@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <string>
 #include "solutionwriter.h"
+#include "array.h"
 
 
 using namespace std;
@@ -12,31 +13,31 @@ using namespace std;
 /*Не должен конструктор ничего печатать, начальные и краевые услови§ то же надо передавать 4 вектора по 3 элемента, и еще положение разрыва х0, до звуковое течение*/
 Godunov::Godunov(void)
 {
-	min_x = 0.0;
-	max_x = 1.0;
+	minX = 0.0;
+	maxX = 1.0;
 
 	cout << "Enter the number of partitions for x:";
 	cin >> N;
 	cout << "Enter max T:";
-	cin >> max_T;
+	cin >> maxT;
 
-	h = (max_x - min_x) / N;
-	tau = 0.411*h;
-	K = (int)(max_T / tau);
+	h = (maxX - minX) / N;
+	tau = 0.411 * h;
+	K = (int)(maxT / tau);
 
 }
 
 Variables Godunov::solver_riman(Variables U_L, Variables U_R) {
-	double gam = 1.4;
+	double gamma = 1.4;
 	struct Variables U;
-	double c_L = 1;
-	double c_R = 1;
+	double cL = 1;
+	double cR = 1;
 	double Ro;
 
-	double a_L = pow(gam*(U_L.p / U_L.ro), 0.5);
-	double a_R = pow(gam*(U_R.p / U_R.ro), 0.5);
-	double P0 = (a_R*U_R.ro*U_L.p + a_L*U_L.ro*U_R.p + a_R*U_R.ro*a_L*U_L.ro*(U_L.u - U_R.u)) / (a_R*U_R.ro + a_L*U_L.ro);
-	double U0 = (a_R*U_R.ro*U_R.u + a_L*U_L.ro*U_L.u + U_L.p - U_R.p) / (a_R*U_R.ro + a_L*U_L.ro);
+	double aL = pow(gamma*(U_L.p / U_L.ro), 0.5);
+	double aR = pow(gamma*(U_R.p / U_R.ro), 0.5);
+	double P0 = (aR*U_R.ro*U_L.p + aL*U_L.ro*U_R.p + aR*U_R.ro*aL*U_L.ro*(U_L.u - U_R.u)) / (aR*U_R.ro + aL*U_L.ro);
+	double U0 = (aR*U_R.ro*U_R.u + aL*U_L.ro*U_L.u + U_L.p - U_R.p) / (aR*U_R.ro + aL*U_L.ro);
 
 	double P_buf = 3;
 	double U_buf = 3000;
@@ -47,50 +48,50 @@ Variables Godunov::solver_riman(Variables U_L, Variables U_R) {
 		U_buf = U0;
 
 		if (P0<U_L.p) {
-			c_L = a_L * U_L.ro*(gam - 1)*(1 - (P0 / U_L.p)) / (2 * gam*(1 - pow(P0 / U_L.p, (gam - 1) / (2 * gam))));
+			cL = aL * U_L.ro*(gamma - 1)*(1 - (P0 / U_L.p)) / (2 * gamma*(1 - pow(P0 / U_L.p, (gamma - 1) / (2 * gamma))));
 			//cout<<"veer voln razr vlevo \n";
-			D_L = U_L.u - c_L / U_L.ro;
+			leftD = U_L.u - cL / U_L.ro;
 		}
 		else if (P0>U_L.p) {
-			c_L = sqrt(U_L.ro*((gam + 1)*P0 + (gam - 1)*U_L.p) / 2.0);
+			cL = sqrt(U_L.ro*((gamma + 1)*P0 + (gamma - 1)*U_L.p) / 2.0);
 			//cout<<"Udarnaia volna vlevo\n";
-			D_L = U_L.u - a_L;
+			leftD = U_L.u - aL;
 		}
 
 
 		if (P0<U_R.p) {
-			c_R = a_R * U_R.ro*(gam - 1)*(1 - P0 / U_R.p) / (2 * gam*(1 - pow(P0 / U_R.p, (gam - 1) / (2 * gam))));
+			cR = aR * U_R.ro*(gamma - 1)*(1 - P0 / U_R.p) / (2 * gamma*(1 - pow(P0 / U_R.p, (gamma - 1) / (2 * gamma))));
 			//cout<<"veer voln razr vpravo\n";
-			D_R = U_R.u + c_R / U_R.ro;
+			rightD = U_R.u + cR / U_R.ro;
 		}
 		else if (P0>U_R.p) {
-			c_R = sqrt(U_R.ro*((gam + 1)*P0 + (gam - 1)*U_R.p) / 2.0);
+			cR = sqrt(U_R.ro*((gamma + 1)*P0 + (gamma - 1)*U_R.p) / 2.0);
 			//cout<<"Udarnaia volna vpravo \n";
-			D_R = U_R.u + a_R;
+			rightD = U_R.u + aR;
 		}
 
-		P0 = (c_R * U_L.p + c_L *U_R.p + c_R * c_L * (U_L.u - U_R.u)) / (c_R + c_L);
-		U0 = (c_L * U_L.u + c_R * U_R.u + U_L.p - U_R.p) / (c_R + c_L);
+		P0 = (cR * U_L.p + cL *U_R.p + cR * cL * (U_L.u - U_R.u)) / (cR + cL);
+		U0 = (cL * U_L.u + cR * U_R.u + U_L.p - U_R.p) / (cR + cL);
 	}
 
 	//Ччитаем ро
 	Ro = (U_L.ro + U_R.ro) / 2;
 	if (U0<0) {
 		if (P0>U_R.p) {//ударна§ волна
-			Ro = U_R.ro*((gam + 1)*P0 + (gam - 1)*U_R.p) / ((gam - 1)*P0 + (gam + 1)*U_R.p);
+			Ro = U_R.ro*((gamma + 1)*P0 + (gamma - 1)*U_R.p) / ((gamma - 1)*P0 + (gamma + 1)*U_R.p);
 		}
 		if (P0<U_R.p) {//веер волн
-			double a_new_R = a_R - ((gam - 1) / 2)*(U_R.u - U0);
-			Ro = gam*P0 / pow(a_new_R, 2);
+			double a_new_R = aR - ((gamma - 1) / 2)*(U_R.u - U0);
+			Ro = gamma*P0 / pow(a_new_R, 2);
 		}
 	}
 	else if (U0>0) {
 		if (P0>U_L.p) {//ударна§ волна
-			Ro = U_L.ro*((gam + 1)*P0 + (gam - 1)*U_L.p) / ((gam - 1)*P0 + (gam + 1)*U_L.p);
+			Ro = U_L.ro*((gamma + 1)*P0 + (gamma - 1)*U_L.p) / ((gamma - 1)*P0 + (gamma + 1)*U_L.p);
 		}
 		if (P0<U_L.p) {//веер волн
-			double a_new_L = a_L + ((gam - 1) / 2)*(U_L.u - U0);
-			Ro = gam*P0 / pow(a_new_L, 2);
+			double a_new_L = aL + ((gamma - 1) / 2)*(U_L.u - U0);
+			Ro = gamma*P0 / pow(a_new_L, 2);
 		}
 	}
 
@@ -103,33 +104,27 @@ Variables Godunov::solver_riman(Variables U_L, Variables U_R) {
 		U.ro = (U_L.ro + U_R.ro) / 2;
 		U.u = (U_L.u + U_R.u) / 2;
 		U.p = (U_L.p + U_R.p) / 2;
-		D_L = U.u;//04.01
-		D_R = U.u;
+		leftD = U.u;//04.01
+		rightD = U.u;
 	}
 
 	return U;
 }
 
-void Godunov::solver(double *ro, double *u, double *p, int n1) {
-	double gam = 1.4;
-	struct consv *U;
-	struct consv *U_new;
-	struct potoc *F;
-	F = new struct potoc[n1];
-	U = new struct consv[n1];
-	U_new = new struct consv[n1];
+void Godunov::solver(Array<double> &ro, Array<double> &u, Array<double> &p, int n1) {
+	double gamma = 1.4;
+	Array<consv> U(n1);
+	Array<consv> U_new(n1); 
+	Array<potoc> F(n1);
+	
+	Array<consv> U_drob(n1);
+	Array<potoc> F_drob(n1);
 
-	struct consv *U_drob;
-	struct potoc *F_drob;
-	F_drob = new struct potoc[n1];
-	U_drob = new struct consv[n1];
-
-	for (int i = 0; i<n1; i++) {
-
+	for (int i = 0; i < n1; i++) {
 		U[i].U1 = ro[i];
 		U[i].U2 = ro[i] * u[i];
 		double e = ro[i] * ((1.0 / (1.4 - 1.0))*(p[i] / ro[i]));
-		U[i].U3 = (p[i] / (gam - 1)) + 0.5*ro[i] * pow(u[i], 2);//
+		U[i].U3 = (p[i] / (gamma - 1)) + 0.5*ro[i] * pow(u[i], 2);//
 
 	}
 
@@ -138,7 +133,7 @@ void Godunov::solver(double *ro, double *u, double *p, int n1) {
 			double E;
 			if (p[i - 1] == p[i] && ro[i - 1] == ro[i] && u[i - 1] == u[i]) {
 
-				E = (p[i] / (gam - 1)) + 0.5*ro[i] * pow(u[i], 2);
+				E = (p[i] / (gamma - 1)) + 0.5*ro[i] * pow(u[i], 2);
 
 				F_minus.F1 = ro[i] * u[i];
 				F_minus.F2 = p[i] + ro[i] * pow(u[i], 2);
@@ -150,7 +145,7 @@ void Godunov::solver(double *ro, double *u, double *p, int n1) {
 				Variables U_res;
 				U_res = solver_riman(U_L, U_R);
 
-				E = (U_res.p / (gam - 1)) + 0.5*U_res.ro*pow(U_res.u, 2);
+				E = (U_res.p / (gamma - 1)) + 0.5*U_res.ro*pow(U_res.u, 2);
 
 				F_minus.F1 = U_res.ro*U_res.u;
 				F_minus.F2 = U_res.p + U_res.ro*pow(U_res.u, 2);
@@ -160,7 +155,7 @@ void Godunov::solver(double *ro, double *u, double *p, int n1) {
 			}
 
 			if (p[i] == p[i + 1] && ro[i] == ro[i + 1] && u[i] == u[i + 1]) {
-				E = (p[i] / (gam - 1)) + 0.5*ro[i] * pow(u[i], 2);
+				E = (p[i] / (gamma - 1)) + 0.5*ro[i] * pow(u[i], 2);
 
 				F_plus.F1 = ro[i] * u[i];
 				F_plus.F2 = p[i] + ro[i] * pow(u[i], 2);
@@ -172,13 +167,12 @@ void Godunov::solver(double *ro, double *u, double *p, int n1) {
 				Variables U_res;
 				U_res = solver_riman(U_L, U_R);
 
-				E = (U_res.p / (gam - 1)) + 0.5*U_res.ro*pow(U_res.u, 2);
+				E = (U_res.p / (gamma - 1)) + 0.5*U_res.ro*pow(U_res.u, 2);
 
 				F_plus.F1 = U_res.ro*U_res.u;
 				F_plus.F2 = U_res.p + U_res.ro*pow(U_res.u, 2);
 				F_plus.F3 = U_res.u*(U_res.p + E);
 			}
-
 
 			U_new[i].U1 = U[i].U1 - (tau / (h))*(F_plus.F1 - F_minus.F1);
 			U_new[i].U2 = U[i].U2 - (tau / (h))*(F_plus.F2 - F_minus.F2);
@@ -186,96 +180,77 @@ void Godunov::solver(double *ro, double *u, double *p, int n1) {
 		
 	}
 
-	for (int i = 1; i<n1 - 1; i++) {
+	for (int i = 1; i< n1-1; i++) {
 		ro[i] = U_new[i].U1;
 		u[i] = U_new[i].U2 / U_new[i].U1;
-		p[i] = (gam - 1.0)*(U_new[i].U3 - (pow(U_new[i].U2, 2)) / (2.0*U_new[i].U1));
+		p[i] = (gamma - 1.0)*(U_new[i].U3 - (pow(U_new[i].U2, 2)) / (2.0*U_new[i].U1));
 	}
-
-
-	delete[]U;
-	delete[]U_new;
-	delete[]F;
-	delete[]U_drob;
-	delete[]F_drob;
-	ro = NULL; u = NULL; p = NULL;
-	U = NULL; F = NULL;
-	U_drob = NULL; F_drob = NULL;
-	U_new = NULL;
 }
 
-void Godunov::solve() {
-	double gam = 1.4;
 
-	const int n1 = N + 1;
+void Godunov::setInitialConditions(Array<double> &ro, Array<double> &u, Array<double> &p,
+								   double x0, Variables &left, Variables &right) {
 
-
-	double *ro;
-	double *u;
-	double *p;
-	ro = new double[n1];
-	u = new double[n1];
-	p = new double[n1];
-
-
-	for (int i = 0; i < n1; i++) {
-		ro[i] = 0;
-		p[i] = 0;
-		u[i] = 0;
-	}
-
-
-	//начальное усдловие
-	for (int i = 0; i < n1; i++) {
-		if ((min_x + (h*i))<x0) {// Уут точно х0
-			p[i] = kr_l.p;
-			ro[i] = kr_l.ro;
-			u[i] = kr_l.u;
+	//проверка что все массивы однойдлины
+	for (int i = 0; i < p.length(); i++) {
+		if ((minX + (h * i)) < x0) {
+			p[i] = left.p;
+			ro[i] = left.ro;
+			u[i] = left.u;
 		}
 		else {
-			p[i] = kr_r.p;//ro
-			ro[i] = kr_r.ro;// ro8u
-			u[i] = kr_r.u;//E
+			p[i] = right.p;
+			ro[i] = right.ro;
+			u[i] = right.u;
 		}
 	}
-	
+}
 
 
-	double T_vsego = 0;
+void Godunov::setBoundaryConditions(Array<double> &ro, Array<double> &u, Array<double> &p, 
+	                                Variables &left, Variables &right) {
+	ro.setFirst(left.ro);
+	u.setFirst(left.u);
+	p.setFirst(left.p);
+
+	ro.setLast(right.ro);
+	u.setLast(right.u);
+	p.setLast(right.p);
+}
+
+
+void Godunov::solve() {
+	double gamma = 1.4;
+
+	const int arrSize = N + 1;
+
+	Array<double> ro(arrSize);
+	Array<double> u(arrSize);
+	Array<double> p(arrSize);
+
+	setInitialConditions(ro, u, p, x0, bcLeft, bcRight);
+
+	double t = 0;
+	double coef = 0.3;
 	int k = 0;
-	//for(int k = 0; k < (max_T/tau); k++){
-	while (T_vsego <= max_T) {// && k < 100000000){
-		solver(ro, u, p, n1);
+	while (t <= maxT) {
+		solver(ro, u, p, arrSize);
 		//граничные услови§
-		ro[0] = kr_l.ro;
-		u[0] = kr_l.u;
-		p[0] = kr_l.p;
-		ro[n1 - 1] = kr_r.ro;
-		u[n1 - 1] = kr_r.u;
-		p[n1 - 1] = kr_r.p;
+		setBoundaryConditions(ro, u, p, bcLeft, bcRight);
 
 		//подбор шага по шагу
-		T_vsego += tau;
+		t += tau;
 		k++;
-		tau = min(tau, 0.3*h / (max(fabs(D_L), fabs(D_R))));
-		//tau=min(tau, 0.3*h/(max(fabs(a_L), fabs(a_R))));
-		//tau=min(tau, 0.3*h/(max(u,n1)));
-		if (tau == -1) {
-			//cout<<"\n \t T: "<<T_vsego<<"\t tau: "<<tau<<"\n\n\n";
-			//break;
-			tau = min(tau, 0.3*h / (max(u, n1)));
-			//tau = 0.3*h;
-		}
-		cout << "\n \t T: " << T_vsego << "\t tau: " << tau << "\t h: " << h << "\n\n";
+		tau = min(tau, coef * h / (max(fabs(leftD), fabs(rightD))));
+		if (tau == -1) tau = min(tau, coef * h / (u.max()));
+
+		cout << "\n \t T: " << t << "\t tau: " << tau << "\t h: " << h << "\n\n";
 	}
-	cout << "\n \t T: " << T_vsego << "\n\n\n";
+	cout << "\n \t T: " << t << "\n\n\n";
 
 	//----------------------Testing----------------------------------------//
-	(new SolutionWriter())->write("Godunov", ro, u, p, n1);
+	(new SolutionWriter())->write("Godunov", ro, u, p);
 
-	delete[]ro;
-	delete[]u;
-	delete[]p;
 	ro = NULL; u = NULL; p = NULL;
 }
 
