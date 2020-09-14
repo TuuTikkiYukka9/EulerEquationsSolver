@@ -127,6 +127,7 @@
     <ClInclude Include="src\godunov.h" />
     <ClInclude Include="src\iequationsystemreader.h" />
     <ClInclude Include="src\isolutionwriter.h" />
+    <ClInclude Include="src\matrix.h" />
     <ClInclude Include="src\solutionwriter.h" />
     <ClInclude Include="src\solver.h" />
   </ItemGroup>

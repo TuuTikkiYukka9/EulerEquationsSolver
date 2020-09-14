@@ -5,11 +5,12 @@
 #include "ASUM.h"
 #include "Godunov.h"
 #include "equationsystemreader.h"
-
+#include "matrix.h"
 
 using namespace std;
 
 int main() {
+
 	std::string name_file = "input\\input.txt";
 	IEquationSystemReader *equationSystemReader = new EquationSystemReader();
 	EquationSystem eq = equationSystemReader->readFile(name_file);
@@ -49,7 +50,7 @@ int main() {
 		cout << "\n\n";
 		ch = 5;
 	}
-
+	delete equationSystemReader;
 	system("pause");
 	return 0;
 }

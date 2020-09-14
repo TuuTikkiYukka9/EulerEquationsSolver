@@ -191,7 +191,7 @@ void Godunov::solver(Array<double> &ro, Array<double> &u, Array<double> &p, int 
 void Godunov::setInitialConditions(Array<double> &ro, Array<double> &u, Array<double> &p,
 								   double x0, Variables &left, Variables &right) {
 
-	//проверка что все массивы однойдлины
+	//проверка что все массивы одной длины
 	for (int i = 0; i < p.length(); i++) {
 		if ((minX + (h * i)) < x0) {
 			p[i] = left.p;
