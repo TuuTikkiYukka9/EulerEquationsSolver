@@ -7,14 +7,17 @@ class ASUM : public Solver
 private:
 	double calcSpeedOfSound(Variables var);
 	double calcMachNumber(Variables var);
-	double m_plus(Variables var);
-	double m_minus(Variables var);
-	double p_plus(Variables var);
-	double p_minus(Variables var);
+	double mPlus(Variables var);
+	double mMinus(Variables var);
+	double pPlus(Variables var);
+	double pMinus(Variables var);
 	double calcBorderMachNumber(Variables &left, Variables &right);
 	double calcBorderPressure(Variables &left, Variables &right);
-	potoc calcFlow(Variables var, double borderMachNumber, double borderPressure);
-	potoc calcFlow(Variables &left, Variables &right);
+	Flow calcFlow(Variables var, double borderMachNumber, double borderPressure);
+	Flow calcFlow(Variables &left, Variables &right);
+	void writeVectorOfConservedAndVectorOfFlows(ConservativeVariables& U, Flow& F, Variables var);
+	ConservativeVariables calculateVectorOfConservativeValues(ConservativeVariables& lastU, Flow& F_plus, Flow& F_minus);
+	void calculateValues(Flow& F, double& ro, double& u, double& p, ConservativeVariables& U);
 public:
 	ASUM();
 	~ASUM();

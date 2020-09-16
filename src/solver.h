@@ -12,13 +12,13 @@ struct Variables {
 	double p;
 };
 
-struct consv {
+struct ConservativeVariables {
 	double U1;
 	double U2;
 	double U3;
 };
 
-struct potoc {
+struct Flow {
 	double F1;
 	double F2;
 	double F3;

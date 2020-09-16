@@ -113,12 +113,12 @@ Variables Godunov::solver_riman(Variables U_L, Variables U_R) {
 
 void Godunov::solver(Array<double> &ro, Array<double> &u, Array<double> &p, int n1) {
 	double gamma = 1.4;
-	Array<consv> U(n1);
-	Array<consv> U_new(n1); 
-	Array<potoc> F(n1);
+	Array<ConservativeVariables> U(n1);
+	Array<ConservativeVariables> U_new(n1); 
+	Array<Flow> F(n1);
 	
-	Array<consv> U_drob(n1);
-	Array<potoc> F_drob(n1);
+	Array<ConservativeVariables> U_drob(n1);
+	Array<Flow> F_drob(n1);
 
 	for (int i = 0; i < n1; i++) {
 		U[i].U1 = ro[i];
@@ -129,7 +129,7 @@ void Godunov::solver(Array<double> &ro, Array<double> &u, Array<double> &p, int 
 	}
 
 	for (int i = 1; i<n1 - 1; i++) {
-			struct potoc F_plus, F_minus;
+			struct Flow F_plus, F_minus;
 			double E;
 			if (p[i - 1] == p[i] && ro[i - 1] == ro[i] && u[i - 1] == u[i]) {
 
