@@ -9,27 +9,30 @@
 using namespace std;
 ASUM::ASUM()
 {
-	minX = 0.0;
-	maxX = 1.0;
+	N = 0;
+	K = 0;
+	maxT = 0;
+	h = 0;
+	tau = 0;
+}
 
-	double Kur = 2;
-	while (Kur>1.0) {
-		cout << "Enter the number of partitions for x:";
-		cin >> N;
-		cout << "Enter the number of partitions for t:";
-		cin >> K;
-		cout << "Enter max T:";
-		cin >> maxT;
-		h = (maxX - minX) / N;
-		tau = (maxT) / K;
-		Kur = (tau) / (2 * h);
-		cout << "chislo_Kuranta:" << Kur << "\n";
-	}
-
+Response ASUM::initÑomputationalGrid(const ÑomputationalGrid &grid, double maxTime) {
+	const double dh = (maxX - minX) / grid.numberOfXSplits;
+	const double dT = maxTime / grid.numberOfTimeSplits;
+	const double courantNumber = dT / (2 * dh);
+	if (courantNumber > 1.0) return Response{ false, "Courant number should not be more than 1!" };
+	N = grid.numberOfXSplits;
+	K = grid.numberOfTimeSplits;
+	maxT = maxTime;
+	h = dh;
+	tau = dT;
+	return Response{ true, "" };
 }
 
 
 void ASUM::solve() {
+
+	if (maxT == 0) return;
 
 	const int nk = (K + 1);
 	const int n1 = N + 1;

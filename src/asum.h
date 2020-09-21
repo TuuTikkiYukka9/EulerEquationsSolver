@@ -22,6 +22,7 @@ public:
 	ASUM();
 	~ASUM();
 	void solve();
+	Response init—omputationalGrid(const —omputationalGrid &grid, double maxTime);
 	void setBoundaryConditions(Array<double> &ro, Array<double> &u, Array<double> &p, Variables &left, Variables &right);
 	void setInitialConditions(Array<double> &ro, Array<double> &u, Array<double> &p, double x0, Variables &left, Variables &right);
 

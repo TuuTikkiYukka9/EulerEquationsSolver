@@ -6,28 +6,30 @@
 #include "solutionwriter.h"
 #include "array.h"
 
-
 using namespace std;
 
-//-------------------------------------------------------------------------
-/*Ќе должен конструктор ничего печатать, начальные и краевые услови¤ то же надо передавать 4 вектора по 3 элемента, и еще положение разрыва х0, до звуковое течение*/
 Godunov::Godunov(void)
 {
-	minX = 0.0;
-	maxX = 1.0;
+	N = 0;
+	K = 0;
+	maxT = 0;
+	h = 0;
+	tau = 0;
+}
 
-	cout << "Enter the number of partitions for x:";
-	cin >> N;
-	cout << "Enter max T:";
-	cin >> maxT;
 
+Response Godunov::initСomputationalGrid(const СomputationalGrid &grid, double maxTime) {
+	N = grid.numberOfXSplits;
+	maxT = maxTime;
 	h = (maxX - minX) / N;
 	tau = 0.411 * h;
 	K = (int)(maxT / tau);
-
+	return Response{ true, "" };
 }
 
+
 Variables Godunov::solver_riman(Variables U_L, Variables U_R) {
+
 	double gamma = 1.4;
 	struct Variables U;
 	double cL = 1;
@@ -112,6 +114,9 @@ Variables Godunov::solver_riman(Variables U_L, Variables U_R) {
 }
 
 void Godunov::solver(Array<double> &ro, Array<double> &u, Array<double> &p, int n1) {
+
+	if (maxT == 0) return;
+
 	double gamma = 1.4;
 	Array<ConservativeVariables> U(n1);
 	Array<ConservativeVariables> U_new(n1); 

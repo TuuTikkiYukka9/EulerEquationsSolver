@@ -32,16 +32,41 @@ int main() {
 			eq = equationSystemReader->readFile(name_file);
 		}
 		else if (ch == 0) {
+			ÑomputationalGrid grid;
+			double maxT;
+			cout << "Enter the number of partitions for x:";
+			cin >> grid.numberOfXSplits;
+            cout << "Enter max T:";
+            cin >> maxT;
+
 			Godunov a;
 			ptr = &a;
 			ptr->init(eq);
-			ptr->solve();
+			if ((ptr->initÑomputationalGrid(grid, maxT)).success) {
+				ptr->solve();
+			}
 		}
 		else if (ch == 1) {
+			ÑomputationalGrid grid;
+			double maxT;
+
+			cout << "Enter the number of partitions for x:";
+			cin >> grid.numberOfXSplits;
+			cout << "Enter the number of partitions for t:";
+			cin >> grid.numberOfTimeSplits;
+			cout << "Enter max T:";
+			cin >> maxT;
+
 			ASUM a;
 			ptr = &a;
 			ptr->init(eq);
-			ptr->solve();
+			const Response resp = ptr->initÑomputationalGrid(grid, maxT);
+			if (resp.success) {
+				ptr->solve();
+			}
+			else {
+				cout << resp.message;
+			}
 		}
 		else if (ch == 3) {
 			return 0;

@@ -1,6 +1,6 @@
 #include "Solver.h"
 
-void Solver::init(EquationSystem &eq) {
+void Solver::init(const EquationSystem &eq) {
 	bcLeft = eq.leftBoundaryCondition;
 	bcRight = eq.rightBoundaryCondition;
 	x0 = eq.x0;

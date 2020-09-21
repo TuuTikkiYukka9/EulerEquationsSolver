@@ -24,6 +24,11 @@ struct Flow {
 	double F3;
 };
 
+struct —omputationalGrid {
+	int numberOfTimeSplits;
+	int numberOfXSplits;
+};
+
 struct EquationSystem
 {
 	Variables leftBoundaryCondition;
@@ -31,6 +36,11 @@ struct EquationSystem
 	double x0;
 	double maxX;
 	double minX;
+};
+
+struct Response {
+	bool success;
+	std::string message;
 };
 
 class Solver
@@ -48,6 +58,7 @@ protected:
 
 public:
 	void virtual solve() {}
-	void init(EquationSystem &eq);
+	Response virtual init—omputationalGrid(const —omputationalGrid &grid, double maxTime) { return Response { false, "" }; }
+	void init(const EquationSystem &eq);
 };
 
