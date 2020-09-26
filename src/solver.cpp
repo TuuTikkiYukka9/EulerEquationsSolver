@@ -1,4 +1,4 @@
-#include "Solver.h"
+#include "solver.h"
 
 void Solver::init(const EquationSystem &eq) {
 	bcLeft = eq.leftBoundaryCondition;

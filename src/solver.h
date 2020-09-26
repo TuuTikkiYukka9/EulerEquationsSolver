@@ -5,11 +5,13 @@
 #include <fstream>
 #include <iomanip>
 #include <vector>
+#include "array.h"
 
+template <typename T>
 struct Variables {
-	double ro;
-	double u;
-	double p;
+	T ro;
+	T u;
+	T p;
 };
 
 struct ConservativeVariables {
@@ -31,8 +33,8 @@ struct —omputationalGrid {
 
 struct EquationSystem
 {
-	Variables leftBoundaryCondition;
-	Variables rightBoundaryCondition;
+	Variables<double> leftBoundaryCondition;
+	Variables<double> rightBoundaryCondition;
 	double x0;
 	double maxX;
 	double minX;
@@ -46,8 +48,8 @@ struct Response {
 class Solver
 {
 protected:
-	Variables bcLeft;
-	Variables bcRight;
+	Variables<double> bcLeft;
+	Variables<double> bcRight;
 	double x0;
 	int N, K;
 
@@ -57,7 +59,7 @@ protected:
 	double minX;
 
 public:
-	void virtual solve() {}
+	Variables<Array<double>*> virtual solve() { return { nullptr, nullptr, nullptr }; }
 	Response virtual init—omputationalGrid(const —omputationalGrid &grid, double maxTime) { return Response { false, "" }; }
 	void init(const EquationSystem &eq);
 };

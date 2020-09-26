@@ -1,14 +1,8 @@
-#include "ASUM.h"
-#include <iostream>
-#include <fstream>
-#include <iomanip>
-#include <string>
-#include "solutionwriter.h"
+#include "asum.h"
 #include "matrix.h"
 
 using namespace std;
-ASUM::ASUM()
-{
+ASUM::ASUM() {
 	N = 0;
 	K = 0;
 	maxT = 0;
@@ -16,7 +10,7 @@ ASUM::ASUM()
 	tau = 0;
 }
 
-Response ASUM::initÑomputationalGrid(const ÑomputationalGrid &grid, double maxTime) {
+Response ASUM::initÑomputationalGrid(const ÑomputationalGrid &grid, const double maxTime) {
 	const double dh = (maxX - minX) / grid.numberOfXSplits;
 	const double dT = maxTime / grid.numberOfTimeSplits;
 	const double courantNumber = dT / (2 * dh);
@@ -30,9 +24,9 @@ Response ASUM::initÑomputationalGrid(const ÑomputationalGrid &grid, double maxTi
 }
 
 
-void ASUM::solve() {
+Variables<Array<double>*> ASUM::solve() {
 
-	if (maxT == 0) return;
+	if (maxT == 0) return { nullptr, nullptr, nullptr };
 
 	const int nk = (K + 1);
 	const int n1 = N + 1;
@@ -40,6 +34,9 @@ void ASUM::solve() {
 	Matrix<double> ro(nk, n1);
 	Matrix<double> u(nk, n1);
 	Matrix<double> p(nk, n1);
+	Array<double> *ResultRo = new Array<double>(n1);
+	Array<double> *ResultU = new Array<double>(n1);
+	Array<double> *ResultP = new Array<double>(n1);
 
 	Matrix<ConservativeVariables> U(nk, n1);
 	Matrix<Flow> F(nk, n1);
@@ -50,22 +47,34 @@ void ASUM::solve() {
 	p.SetAllElements(0);
 	u.SetAllElements(0);
 
-	Variables left, right;
+	Variables<double> left, right;
 	Flow F_plus, F_minus;
-
-	
+	Variables<double> calculatedVariables;
 	//íà÷àëüíîå óñëîâèå
-	setInitialConditions(ro[0], u[0], p[0], x0, bcLeft, bcRight);
+
+	Variables<Array<double>*> initValues = getInitialConditions(p[0].length(), x0, bcLeft, bcRight);
+	ro[0] = (*initValues.ro);
+	u[0] = (*initValues.u);
+	p[0] = (*initValues.p);
+	delete initValues.ro;
+	delete initValues.u;
+	delete initValues.p;
 
 	//ãðàíè÷íûå óñëîâèÿ
-	for (int k = 0; k < p.height(); k++) {
-		setBoundaryConditions(ro[k], u[k], p[k], bcLeft, bcRight);
-	}
+	for (int k = 1; k < p.height(); k++) {
+		ro[k].setFirst(bcLeft.ro);
+		u[k].setFirst(bcLeft.u);
+		p[k].setFirst(bcLeft.p);
 
+		ro[k].setLast(bcRight.ro);
+		u[k].setLast(bcRight.u);
+		p[k].setLast(bcRight.p);
+	}
 	//Ïðåäñòâèì óðàâíåíèå êàê âåêòîð êîíñåðâàòèâíûõ âåëè÷èí è âåêòîð ïîòîêîâ
 	for (int k = 0; k < p.height(); k++) {
 		for (int i = 0; i < p.width(); i++) {
-			writeVectorOfConservedAndVectorOfFlows(U[k][i], F[k][i], { ro[k][i], u[k][i], p[k][i] });
+			U[k][i] = getVectorOfConserved({ ro[k][i], u[k][i], p[k][i] });
+			F[k][i] = getVectorOfFlows({ ro[k][i], u[k][i], p[k][i] });
 		}
 	}
 
@@ -75,7 +84,7 @@ void ASUM::solve() {
 
 			for (int iter = 0; iter < 2; iter++) {
 				int j = i + iter;
-					
+
 				left = { ro[k][j - 1], u[k][j - 1], p[k][j - 1] };
 				right = { ro[k][j], u[k][j], p[k][j] };
 
@@ -93,83 +102,130 @@ void ASUM::solve() {
 		}
 
 		for (int i = 1; i < p.width() - 1; i++) {
-			calculateValues(F[k + 1][i], ro[k + 1][i], u[k + 1][i], p[k + 1][i], U[k + 1][i]);
+			calculatedVariables = calculateVariables(U[k + 1][i]);
+			F[k + 1][i] = calculateFlow(calculatedVariables, U[k + 1][i]);
+			ro[k + 1][i] = calculatedVariables.ro;
+			u[k + 1][i] = calculatedVariables.u;
+			p[k + 1][i] = calculatedVariables.p;
 		}
 	}
 
-	//----------------------Testing----------------------------------------//
-	(new SolutionWriter())->write("AUSM", ro[nk - 1], u[nk - 1], p[nk - 1]);
+	(*ResultRo) = ro[nk - 1];
+	(*ResultU) = u[nk - 1];
+	(*ResultP) = p[nk - 1];
+	p[nk - 1].print();
+	return { ResultRo, ResultU, ResultP };
 }
 
+Variables<Array<double>*> ASUM::getBoundaryConditions(const int &arrayLength, const Variables<double> &left, const Variables<double> &right) {
+	Variables<Array<double>*> result;
+	result.p = new Array<double>(arrayLength, 0);
+	result.ro = new Array<double>(arrayLength, 0);
+	result.u = new Array<double>(arrayLength, 0);
 
-void ASUM::calculateValues(Flow& outputF, double& outputRo, double& outputU, double& outputP, ConservativeVariables& U) {
-	outputRo = U.U1;
-	outputU = U.U2 / U.U1;
-	outputP = (1.4 - 1.0)*(U.U3 - (pow(U.U2, 2)) / (2.0*U.U1));
+	result.ro->setFirst(left.ro);
+	result.u->setFirst(left.u);
+	result.p->setFirst(left.p);
 
-	outputF.F1 = U.U2;
-	outputF.F2 = outputP + outputRo * pow(outputU, 2);
-	outputF.F3 = outputU * (outputP + U.U3);
+	result.ro->setLast(right.ro);
+	result.u->setLast(right.u);
+	result.p->setLast(right.p);
+	return result;
 }
 
+Variables<Array<double>*> ASUM::getInitialConditions(const int &arrayLength, const double &x0,
+	const Variables<double> &left, const Variables<double> &right) {
 
-ConservativeVariables ASUM::calculateVectorOfConservativeValues(ConservativeVariables& lastU, Flow& F_plus, Flow& F_minus) {
-	ConservativeVariables U;
-	U.U1 = lastU.U1 - (tau / h)*(F_plus.F1 - F_minus.F1);
-	U.U2 = lastU.U2 - (tau / h)*(F_plus.F2 - F_minus.F2);
-	U.U3 = lastU.U3 - (tau / h)*(F_plus.F3 - F_minus.F3);
-	return U;
+	Variables<Array<double>*> result;
+	result.p = new Array<double>(arrayLength, 0);
+	result.ro = new Array<double>(arrayLength, 0);
+	result.u = new Array<double>(arrayLength, 0);
+
+	double currentCoordinate;
+	bool isLeft;
+
+	double borderMachNumber;
+	
+	for (int i = 0; i < arrayLength; i++) {
+		currentCoordinate = minX + (h*i);
+		if (currentCoordinate == x0) {
+			borderMachNumber = calcBorderMachNumber(left, right);
+		}
+
+		isLeft = currentCoordinate < x0 || (currentCoordinate == x0 && borderMachNumber >= 0);
+		(*result.p)[i] = isLeft ? left.p : right.p;
+		(*result.ro)[i] = isLeft ? left.ro : right.ro;
+		(*result.u)[i] = isLeft ? left.u : right.u;
+	}
+	result.p->print();
+	return result;
 }
 
-
-void ASUM::writeVectorOfConservedAndVectorOfFlows(ConservativeVariables& outputU, Flow& outputF, Variables var) {
-	outputU.U1 = var.ro;
-	outputU.U2 = var.ro * var.u;
-	outputU.U3 = (var.p / (1.4 - 1.0)) + 0.5*var.ro * pow(var.u, 2);
-
-	outputF.F1 = var.ro * var.u;
-	outputF.F2 = var.p + var.ro * pow(var.u, 2);
-	outputF.F3 = var.u * (var.p + outputU.U3);
+ConservativeVariables ASUM::getVectorOfConserved(const Variables<double>& var) {
+	return {
+		var.ro,
+		var.ro * var.u,
+	    (var.p / (1.4 - 1.0)) + 0.5 * var.ro * pow(var.u, 2)
+	};
 }
 
-double ASUM::calcSpeedOfSound(Variables var){
-	double gamma = 1.4;
+Flow ASUM::getVectorOfFlows(const Variables<double>& var) {
+	return {
+		var.ro * var.u,
+		var.p + var.ro * pow(var.u, 2),
+		var.u * (var.p + (var.p / (1.4 - 1.0)) + 0.5*var.ro * pow(var.u, 2))
+	};
+}
+
+ConservativeVariables ASUM::calculateVectorOfConservativeValues(const ConservativeVariables& lastU, 
+	                                                            const Flow& F_plus, const Flow& F_minus) {
+	return { lastU.U1 - (tau / h)*(F_plus.F1 - F_minus.F1),
+			 lastU.U2 - (tau / h)*(F_plus.F2 - F_minus.F2),
+			 lastU.U3 - (tau / h)*(F_plus.F3 - F_minus.F3) } ;
+}
+
+double ASUM::calcSpeedOfSound(const Variables<double>& var){
+	const double gamma = 1.4;
 	return sqrt(gamma * var.p / var.ro);
 }
 
-double ASUM::calcMachNumber(Variables var) {
+double ASUM::calcMachNumber(const Variables<double>& var) {
 	return var.u / calcSpeedOfSound(var);
 }
 
-double ASUM::mPlus(Variables var) {
+double ASUM::mPlus(const Variables<double>& var) {
 	return (fabs(calcMachNumber(var)) <= 1) ? 
 		   (0.25*pow((calcMachNumber(var) + 1), 2)) : 
 		   (0.5*(calcMachNumber(var) + fabs(calcMachNumber(var))));
 }
-double ASUM::mMinus(Variables var) {
+
+double ASUM::mMinus(const Variables<double>& var) {
 	return (fabs(calcMachNumber(var)) <= 1) ? 
 		   (-0.25*pow((calcMachNumber(var) - 1), 2)) : 
 		   (0.5*(calcMachNumber(var) - fabs(calcMachNumber(var))));
 }
-double ASUM::pPlus(Variables var) {
+
+double ASUM::pPlus(const Variables<double>& var) {
 	return fabs(calcMachNumber(var)) <= 1 ? 
 		   0.5*var.p*(1 + calcMachNumber(var)) :
 		   0.5*var.p*((calcMachNumber(var) + fabs(calcMachNumber(var))) / calcMachNumber(var));
 }
-double ASUM::pMinus(Variables var) {
+
+double ASUM::pMinus(const Variables<double>& var) {
 	return fabs(calcMachNumber(var)) <= 1 ? 
 		   0.5*var.p*(1 - calcMachNumber(var)) :
 		   0.5*var.p*((calcMachNumber(var) - fabs(calcMachNumber(var))) / calcMachNumber(var));
 }
 
-
-double ASUM::calcBorderMachNumber(Variables &left, Variables &right){
+double ASUM::calcBorderMachNumber(const Variables<double> &left, const Variables<double> &right){
 	return mPlus(left) + mMinus(right);
 }
-double ASUM::calcBorderPressure(Variables &left, Variables &right) {
+
+double ASUM::calcBorderPressure(const Variables<double> &left, const Variables<double> &right) {
 	return pPlus(left) + pMinus(right);
 }
-Flow ASUM::calcFlow(Variables var, double borderMachNumber, double borderPressure)
+
+Flow ASUM::calcFlow(const Variables<double>& var, const double &borderMachNumber, const double &borderPressure)
 {
 	return {
 		borderMachNumber * var.ro * calcSpeedOfSound(var) + 0,
@@ -177,48 +233,31 @@ Flow ASUM::calcFlow(Variables var, double borderMachNumber, double borderPressur
 		borderMachNumber * (var.p + (var.p / 0.4 + (var.ro * pow(var.u, 2) / 2))) * calcSpeedOfSound(var) + 0
 	};
 }
-Flow ASUM::calcFlow(Variables &left, Variables &right)
+
+Flow ASUM::calcFlow(const Variables<double> &left, const Variables<double> &right)
 {
-	double borderMachNumber = calcBorderMachNumber(left, right);
-	double borderPressure = calcBorderPressure(left, right);
+	const double borderMachNumber = calcBorderMachNumber(left, right);
+	const double borderPressure = calcBorderPressure(left, right);
 	return (borderMachNumber >= 0) ?
 		   calcFlow(left, borderMachNumber, borderPressure) :
 		   calcFlow(right, borderMachNumber, borderPressure);
 }
 
-void ASUM::setBoundaryConditions(Array<double> &ro, Array<double> &u, Array<double> &p,
-	Variables &left, Variables &right) {
-	ro.setFirst(left.ro);
-	u.setFirst(left.u);
-	p.setFirst(left.p);
-
-	ro.setLast(right.ro);
-	u.setLast(right.u);
-	p.setLast(right.p);
+Variables<double> ASUM::calculateVariables(const ConservativeVariables& U) {
+	return {
+	    U.U1,
+		U.U2 / U.U1,
+		(1.4 - 1.0) * (U.U3 - (pow(U.U2, 2)) / (2.0 * U.U1))
+	};
 }
 
-void ASUM::setInitialConditions(Array<double> &ro, Array<double> &u, Array<double> &p,
-	double x0, Variables &left, Variables &right) {
-	
-	double currentCoordinate;
-	bool isLeft;
-
-	double borderMachNumber;
-
-	 for (int i = 0; i < p.length(); i++) {
-		currentCoordinate = minX + (h*i);
-		if (currentCoordinate == x0) {
-			borderMachNumber = calcBorderMachNumber(left, right);
-		}
-
-		isLeft = currentCoordinate < x0 || (currentCoordinate == x0 && borderMachNumber >= 0);
-
-		p[i] = isLeft ? left.p : right.p;
-		ro[i] = isLeft ? left.ro : right.ro;
-		u[i] = isLeft ? left.u: right.u;
-	}
+Flow ASUM::calculateFlow(const Variables<double>& calculatedVariables, const ConservativeVariables& U) {
+	return {
+		U.U2,
+		calculatedVariables.p + calculatedVariables.ro * pow(calculatedVariables.u, 2),
+		calculatedVariables.u * (calculatedVariables.p + U.U3)
+	};
 }
 
-ASUM::~ASUM()
-{
+ASUM::~ASUM() {
 }

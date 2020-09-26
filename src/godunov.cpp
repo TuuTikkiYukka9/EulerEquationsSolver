@@ -1,15 +1,9 @@
-#include "Godunov.h"
-#include <iostream>
-#include <fstream>
-#include <iomanip>
-#include <string>
-#include "solutionwriter.h"
+#include "godunov.h"
 #include "array.h"
 
 using namespace std;
 
-Godunov::Godunov(void)
-{
+Godunov::Godunov(void) {
 	N = 0;
 	K = 0;
 	maxT = 0;
@@ -28,10 +22,10 @@ Response Godunov::initÑomputationalGrid(const ÑomputationalGrid &grid, double ma
 }
 
 
-Variables Godunov::solver_riman(Variables U_L, Variables U_R) {
+Variables<double> Godunov::solver_riman(Variables<double> U_L, Variables<double> U_R) {
 
 	double gamma = 1.4;
-	struct Variables U;
+	struct Variables<double> U;
 	double cL = 1;
 	double cR = 1;
 	double Ro;
@@ -145,9 +139,9 @@ void Godunov::solver(Array<double> &ro, Array<double> &u, Array<double> &p, int 
 				F_minus.F3 = u[i] * (p[i] + E);
 			}
 			else {
-				Variables U_L = { ro[i - 1], u[i - 1], p[i - 1] };
-				Variables U_R = { ro[i], u[i], p[i] };
-				Variables U_res;
+				Variables<double> U_L = { ro[i - 1], u[i - 1], p[i - 1] };
+				Variables<double> U_R = { ro[i], u[i], p[i] };
+				Variables<double> U_res;
 				U_res = solver_riman(U_L, U_R);
 
 				E = (U_res.p / (gamma - 1)) + 0.5*U_res.ro*pow(U_res.u, 2);
@@ -167,9 +161,9 @@ void Godunov::solver(Array<double> &ro, Array<double> &u, Array<double> &p, int 
 				F_plus.F3 = u[i] * (p[i] + E);
 			}
 			else {
-				Variables U_L = { ro[i], u[i], p[i] };
-				Variables U_R = { ro[i + 1], u[i + 1], p[i + 1] };
-				Variables U_res;
+				Variables<double> U_L = { ro[i], u[i], p[i] };
+				Variables<double> U_R = { ro[i + 1], u[i + 1], p[i + 1] };
+				Variables<double> U_res;
 				U_res = solver_riman(U_L, U_R);
 
 				E = (U_res.p / (gamma - 1)) + 0.5*U_res.ro*pow(U_res.u, 2);
@@ -194,7 +188,7 @@ void Godunov::solver(Array<double> &ro, Array<double> &u, Array<double> &p, int 
 
 
 void Godunov::setInitialConditions(Array<double> &ro, Array<double> &u, Array<double> &p,
-								   double x0, Variables &left, Variables &right) {
+								   double x0, Variables<double> &left, Variables<double> &right) {
 
 	//ïðîâåðêà ÷òî âñå ìàññèâû îäíîé äëèíû
 	for (int i = 0; i < p.length(); i++) {
@@ -213,7 +207,7 @@ void Godunov::setInitialConditions(Array<double> &ro, Array<double> &u, Array<do
 
 
 void Godunov::setBoundaryConditions(Array<double> &ro, Array<double> &u, Array<double> &p, 
-	                                Variables &left, Variables &right) {
+	                                Variables<double> &left, Variables<double> &right) {
 	ro.setFirst(left.ro);
 	u.setFirst(left.u);
 	p.setFirst(left.p);
@@ -224,42 +218,38 @@ void Godunov::setBoundaryConditions(Array<double> &ro, Array<double> &u, Array<d
 }
 
 
-void Godunov::solve() {
+Variables<Array<double>*> Godunov::solve() {
 	double gamma = 1.4;
 
 	const int arrSize = N + 1;
 
-	Array<double> ro(arrSize);
-	Array<double> u(arrSize);
-	Array<double> p(arrSize);
+	Array<double> *ro = new Array<double>(arrSize);
+	Array<double> *u = new Array<double>(arrSize);
+	Array<double> *p = new Array<double>(arrSize);
 
-	setInitialConditions(ro, u, p, x0, bcLeft, bcRight);
+	setInitialConditions(*ro, *u, *p, x0, bcLeft, bcRight);
 
 	double t = 0;
 	double coef = 0.3;
 	int k = 0;
 	while (t <= maxT) {
-		solver(ro, u, p, arrSize);
+		solver(*ro, *u, *p, arrSize);
 		//ãðàíè÷íûå óñëîâè¤
-		setBoundaryConditions(ro, u, p, bcLeft, bcRight);
+		setBoundaryConditions(*ro, *u, *p, bcLeft, bcRight);
 
 		//ïîäáîð øàãà ïî øàãó
 		t += tau;
 		k++;
 		tau = min(tau, coef * h / (max(fabs(leftD), fabs(rightD))));
-		if (tau == -1) tau = min(tau, coef * h / (u.max()));
+		if (tau == -1) tau = min(tau, coef * h / (u->max()));
 
 		cout << "\n \t T: " << t << "\t tau: " << tau << "\t h: " << h << "\n\n";
 	}
 	cout << "\n \t T: " << t << "\n\n\n";
 
-	//----------------------Testing----------------------------------------//
-	(new SolutionWriter())->write("Godunov", ro, u, p);
-
-	ro = NULL; u = NULL; p = NULL;
+	return { ro, u, p };
 }
 
-Godunov::~Godunov()
-{
+Godunov::~Godunov() {
 }
 

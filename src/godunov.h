@@ -1,5 +1,5 @@
 #pragma once
-#include "Solver.h"
+#include "solver.h"
 #include "array.h"
 
 class Godunov : public Solver
@@ -10,12 +10,12 @@ public:
 	Godunov();
 	~Godunov();
 
-	Variables solver_riman(Variables U_L, Variables U_R);
-	void solve();
+	Variables<double> solver_riman(Variables<double> U_L, Variables<double> U_R);
+	Variables<Array<double>*> solve();
 	Response init—omputationalGrid(const —omputationalGrid &grid, double maxTime);
 	void solver(Array<double> &ro, Array<double> &u, Array<double> &p, int n1);
-	void setBoundaryConditions(Array<double> &ro, Array<double> &u, Array<double> &p, Variables &left, Variables &right);
-	void setInitialConditions(Array<double> &ro, Array<double> &u, Array<double> &p, double x0, Variables &left, Variables &right);
+	void setBoundaryConditions(Array<double> &ro, Array<double> &u, Array<double> &p, Variables<double> &left, Variables<double> &right);
+	void setInitialConditions(Array<double> &ro, Array<double> &u, Array<double> &p, double x0, Variables<double> &left, Variables<double> &right);
 
 	double max(double a, double b) {
 		if (a>b) return a;

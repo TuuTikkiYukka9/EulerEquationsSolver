@@ -13,20 +13,20 @@ private:
 		return str;
 	};
 
-	void writeFile(std::string fileName, Array<double> &values) {
+	void writeFile(std::string fileName, Array<double>* values) {
 		using namespace std;
 		
 		ofstream fileStream(fileName);
 		
-		for (int i = 0; i < values.length(); i++) {
-			fileStream << setw(8) << right << convertDoubleToString(values[i]) << "\t";
+		for (int i = 0; i < values->length(); i++) {
+			fileStream << setw(8) << right << convertDoubleToString(values->item(i)) << "\t";
 		}
 		fileStream << '\n';
 		fileStream.close();		
 	};
 
 public:
-	void write(std::string methodName, Array<double> &ro, Array<double> &u, Array<double> &p) {
+	void write(std::string methodName, Variables<Array<double>*> var) {
 		using namespace std;
 
 		std::string uFileName, pFileName, roFilrName;
@@ -35,9 +35,9 @@ public:
 		pFileName = "p_" + methodName + ".xls";
 		roFilrName = "ro_" + methodName + ".xls";
 
-		writeFile(uFileName, u);
-		writeFile(pFileName, p);
-		writeFile(roFilrName, ro);
+		writeFile(uFileName, var.u);
+		writeFile(pFileName, var.p);
+		writeFile(roFilrName, var.ro);
 	};
 
 };
