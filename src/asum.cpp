@@ -1,7 +1,7 @@
 #include "asum.h"
 #include "matrix.h"
 
-using namespace std;
+
 ASUM::ASUM() {
 	N = 0;
 	K = 0;
