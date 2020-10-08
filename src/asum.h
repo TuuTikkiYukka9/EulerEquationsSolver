@@ -15,14 +15,12 @@ private:
 	double calcBorderPressure(const Variables<double> &left, const Variables<double> &right);
 	Flow calcFlow(const Variables<double>& var, const double& borderMachNumber, const double& borderPressure);
 	Flow calcFlow(const Variables<double> &left, const Variables<double> &right);
-	//void writeVectorOfConservedAndVectorOfFlows(ConservativeVariables& U, Flow& F, Variables<double> var);
 	ConservativeVariables ASUM::getVectorOfConserved(const Variables<double>& var);
 	Flow ASUM::getVectorOfFlows(const Variables<double>& var);
 	ConservativeVariables calculateVectorOfConservativeValues(const ConservativeVariables& lastU, const Flow& F_plus, const Flow& F_minus);
 	Variables<double> ASUM::calculateVariables(const ConservativeVariables& U);
 	Flow ASUM::calculateFlow(const Variables<double>& calculatedVariables, const ConservativeVariables& U);
-	Variables<Array<double>*> ASUM::getInitialConditions(const int &arrayLength, const double &x0, const Variables<double> &left, const Variables<double> &right);
-	Variables<Array<double>*> ASUM::getBoundaryConditions(const int &arrayLength, const Variables<double> &left, const Variables<double> &right);
+	Array<Variables<double>> ASUM::getInitialConditions(const int &arrayLength, const double &x0, const Variables<double> &left, const Variables<double> &right);
 public:
 	ASUM();
 	~ASUM();
@@ -30,6 +28,5 @@ public:
 	Response init—omputationalGrid(const —omputationalGrid &grid, double maxTime);
 	void setBoundaryConditions(Array<double> &ro, Array<double> &u, Array<double> &p, Variables<double> &left, Variables<double> &right) {};
 	void setInitialConditions(Array<double> &ro, Array<double> &u, Array<double> &p, double x0, Variables<double> &left, Variables<double> &right) {};
-
 };
 

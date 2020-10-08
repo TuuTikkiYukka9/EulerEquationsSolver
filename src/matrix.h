@@ -19,6 +19,10 @@ public:
 		}
 	};
 
+	Matrix(int height, int width, T defultValue) : Matrix(height, width) {
+		SetAllElements(defultValue);
+	};
+
 	Array<T>& operator[](int index) {
 		if (index >= 0 && index < _height) {
 			return (*(*mat)[index]);

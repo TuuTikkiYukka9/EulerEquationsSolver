@@ -19,6 +19,11 @@ public:
 			arr[i] = defualtValue;
 		}
 	};
+	Array(const Array &array) : Array(array._size) {
+		for (int i = 0; i < _size; i++) {
+			arr[i] = array.arr[i];
+		}
+	};
 	~Array() {
 		if (_size > 0 && arr != nullptr) {
 			delete[] arr;

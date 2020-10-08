@@ -28,71 +28,42 @@ Variables<Array<double>*> ASUM::solve() {
 
 	if (maxT == 0) return { nullptr, nullptr, nullptr };
 
-	const int nk = (K + 1);
-	const int n1 = N + 1;
+	const int nmbOfTimeSplits = K + 1;
+	const int nmbOfXSplits = N + 1;
 
-	Matrix<double> ro(nk, n1);
-	Matrix<double> u(nk, n1);
-	Matrix<double> p(nk, n1);
-	Array<double> *ResultRo = new Array<double>(n1);
-	Array<double> *ResultU = new Array<double>(n1);
-	Array<double> *ResultP = new Array<double>(n1);
+	Matrix<Variables<double>> res(nmbOfTimeSplits, nmbOfXSplits, {0, 0, 0});
 
-	Matrix<ConservativeVariables> U(nk, n1);
-	Matrix<Flow> F(nk, n1);
-	Matrix<ConservativeVariables> U_drob(nk, n1);
-	Matrix<Flow> F_drob(nk, n1);
-
-	ro.SetAllElements(0);
-	p.SetAllElements(0);
-	u.SetAllElements(0);
-
-	Variables<double> left, right;
+	Matrix<ConservativeVariables> U(nmbOfTimeSplits, nmbOfXSplits, {0, 0, 0});
+	Matrix<Flow> F(nmbOfTimeSplits, nmbOfXSplits, {0, 0, 0});
 	Flow F_plus, F_minus;
-	Variables<double> calculatedVariables;
-	//начальное условие
-
-	Variables<Array<double>*> initValues = getInitialConditions(p[0].length(), x0, bcLeft, bcRight);
-	ro[0] = (*initValues.ro);
-	u[0] = (*initValues.u);
-	p[0] = (*initValues.p);
-	delete initValues.ro;
-	delete initValues.u;
-	delete initValues.p;
+	
+	res[0] = getInitialConditions(res.width(), x0, bcLeft, bcRight);
 
 	//граничные условия
-	for (int k = 1; k < p.height(); k++) {
-		ro[k].setFirst(bcLeft.ro);
-		u[k].setFirst(bcLeft.u);
-		p[k].setFirst(bcLeft.p);
-
-		ro[k].setLast(bcRight.ro);
-		u[k].setLast(bcRight.u);
-		p[k].setLast(bcRight.p);
+	for (int k = 1; k < res.height(); k++) {
+		res[k].setFirst(bcLeft);
+		res[k].setLast(bcRight);
 	}
 	//Предствим уравнение как вектор консервативных величин и вектор потоков
-	for (int k = 0; k < p.height(); k++) {
-		for (int i = 0; i < p.width(); i++) {
-			U[k][i] = getVectorOfConserved({ ro[k][i], u[k][i], p[k][i] });
-			F[k][i] = getVectorOfFlows({ ro[k][i], u[k][i], p[k][i] });
+	for (int k = 0; k < res.height(); k++) {
+		for (int i = 0; i < res.width(); i++) {
+			U[k][i] = getVectorOfConserved(res[k][i]); 
+			F[k][i] = getVectorOfFlows(res[k][i]);
 		}
 	}
 
-	for (int k = 0; k < p.height() - 1; k++) {
-		for (int i = 1; i < p.width() - 1; i++) {
+	for (int k = 0; k < res.height() - 1; k++) {
+		for (int i = 1; i < res.width() - 1; i++) {
 			//_________________________AUSM_______________________________//	
 
 			for (int iter = 0; iter < 2; iter++) {
 				int j = i + iter;
 
-				left = { ro[k][j - 1], u[k][j - 1], p[k][j - 1] };
-				right = { ro[k][j], u[k][j], p[k][j] };
-
 				if (iter == 0) {
-					F_minus = calcFlow(left, right);
+					F_minus = calcFlow(res[k][j - 1], res[k][j]);
 				}
 				else {
-					F_plus = calcFlow(left, right);
+					F_plus = calcFlow(res[k][j - 1], res[k][j]);
 				}
 			}
 
@@ -101,45 +72,27 @@ Variables<Array<double>*> ASUM::solve() {
 
 		}
 
-		for (int i = 1; i < p.width() - 1; i++) {
-			calculatedVariables = calculateVariables(U[k + 1][i]);
-			F[k + 1][i] = calculateFlow(calculatedVariables, U[k + 1][i]);
-			ro[k + 1][i] = calculatedVariables.ro;
-			u[k + 1][i] = calculatedVariables.u;
-			p[k + 1][i] = calculatedVariables.p;
+		for (int i = 1; i < res.width() - 1; i++) {
+			res[k + 1][i] = calculateVariables(U[k + 1][i]);
+			F[k + 1][i] = calculateFlow(res[k + 1][i], U[k + 1][i]);
 		}
 	}
 
-	(*ResultRo) = ro[nk - 1];
-	(*ResultU) = u[nk - 1];
-	(*ResultP) = p[nk - 1];
-	p[nk - 1].print();
+	Array<double> *ResultRo = new Array<double>(nmbOfXSplits);
+	Array<double> *ResultU = new Array<double>(nmbOfXSplits);
+	Array<double> *ResultP = new Array<double>(nmbOfXSplits);
+	for (int i = 0;i< ResultP->length(); i++){
+		(*ResultRo)[i] = res[nmbOfTimeSplits - 1][i].ro;
+		(*ResultU)[i] = res[nmbOfTimeSplits - 1][i].u;
+		(*ResultP)[i] = res[nmbOfTimeSplits - 1][i].p;
+	}
 	return { ResultRo, ResultU, ResultP };
 }
 
-Variables<Array<double>*> ASUM::getBoundaryConditions(const int &arrayLength, const Variables<double> &left, const Variables<double> &right) {
-	Variables<Array<double>*> result;
-	result.p = new Array<double>(arrayLength, 0);
-	result.ro = new Array<double>(arrayLength, 0);
-	result.u = new Array<double>(arrayLength, 0);
-
-	result.ro->setFirst(left.ro);
-	result.u->setFirst(left.u);
-	result.p->setFirst(left.p);
-
-	result.ro->setLast(right.ro);
-	result.u->setLast(right.u);
-	result.p->setLast(right.p);
-	return result;
-}
-
-Variables<Array<double>*> ASUM::getInitialConditions(const int &arrayLength, const double &x0,
+Array<Variables<double>> ASUM::getInitialConditions(const int &arrayLength, const double &x0,
 	const Variables<double> &left, const Variables<double> &right) {
 
-	Variables<Array<double>*> result;
-	result.p = new Array<double>(arrayLength, 0);
-	result.ro = new Array<double>(arrayLength, 0);
-	result.u = new Array<double>(arrayLength, 0);
+	Array<Variables<double>> result(arrayLength, { 0,0,0 });
 
 	double currentCoordinate;
 	bool isLeft;
@@ -153,11 +106,9 @@ Variables<Array<double>*> ASUM::getInitialConditions(const int &arrayLength, con
 		}
 
 		isLeft = currentCoordinate < x0 || (currentCoordinate == x0 && borderMachNumber >= 0);
-		(*result.p)[i] = isLeft ? left.p : right.p;
-		(*result.ro)[i] = isLeft ? left.ro : right.ro;
-		(*result.u)[i] = isLeft ? left.u : right.u;
+		result[i] = isLeft ? left : right;
+
 	}
-	result.p->print();
 	return result;
 }
 
