@@ -14,6 +14,12 @@ struct Variables {
 	T p;
 };
 
+template <typename T>
+struct Discontinuity {
+	T left;
+	T right;
+};
+
 struct ConservativeVariables {
 	double U1;
 	double U2;

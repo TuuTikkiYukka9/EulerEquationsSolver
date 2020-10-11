@@ -92,7 +92,7 @@ Variables<Array<double>*> ASUM::solve() {
 Array<Variables<double>> ASUM::getInitialConditions(const int &arrayLength, const double &x0,
 	const Variables<double> &left, const Variables<double> &right) {
 
-	Array<Variables<double>> result(arrayLength, { 0,0,0 });
+	Array<Variables<double>> result(arrayLength, { 0, 0, 0 });
 
 	double currentCoordinate;
 	bool isLeft;
@@ -100,7 +100,7 @@ Array<Variables<double>> ASUM::getInitialConditions(const int &arrayLength, cons
 	double borderMachNumber;
 	
 	for (int i = 0; i < arrayLength; i++) {
-		currentCoordinate = minX + (h*i);
+		currentCoordinate = minX + (h * i);
 		if (currentCoordinate == x0) {
 			borderMachNumber = calcBorderMachNumber(left, right);
 		}
@@ -146,26 +146,26 @@ double ASUM::calcMachNumber(const Variables<double>& var) {
 
 double ASUM::mPlus(const Variables<double>& var) {
 	return (fabs(calcMachNumber(var)) <= 1) ? 
-		   (0.25*pow((calcMachNumber(var) + 1), 2)) : 
-		   (0.5*(calcMachNumber(var) + fabs(calcMachNumber(var))));
+		   (0.25 * pow((calcMachNumber(var) + 1), 2)) : 
+		   (0.5 * (calcMachNumber(var) + fabs(calcMachNumber(var))));
 }
 
 double ASUM::mMinus(const Variables<double>& var) {
 	return (fabs(calcMachNumber(var)) <= 1) ? 
-		   (-0.25*pow((calcMachNumber(var) - 1), 2)) : 
-		   (0.5*(calcMachNumber(var) - fabs(calcMachNumber(var))));
+		   (-0.25 * pow((calcMachNumber(var) - 1), 2)) : 
+		   (0.5 * (calcMachNumber(var) - fabs(calcMachNumber(var))));
 }
 
 double ASUM::pPlus(const Variables<double>& var) {
 	return fabs(calcMachNumber(var)) <= 1 ? 
-		   0.5*var.p*(1 + calcMachNumber(var)) :
-		   0.5*var.p*((calcMachNumber(var) + fabs(calcMachNumber(var))) / calcMachNumber(var));
+		   0.5 * var.p * (1 + calcMachNumber(var)) :
+		   0.5 * var.p * ((calcMachNumber(var) + fabs(calcMachNumber(var))) / calcMachNumber(var));
 }
 
 double ASUM::pMinus(const Variables<double>& var) {
 	return fabs(calcMachNumber(var)) <= 1 ? 
-		   0.5*var.p*(1 - calcMachNumber(var)) :
-		   0.5*var.p*((calcMachNumber(var) - fabs(calcMachNumber(var))) / calcMachNumber(var));
+		   0.5 * var.p * (1 - calcMachNumber(var)) :
+		   0.5 * var.p * ((calcMachNumber(var) - fabs(calcMachNumber(var))) / calcMachNumber(var));
 }
 
 double ASUM::calcBorderMachNumber(const Variables<double> &left, const Variables<double> &right){

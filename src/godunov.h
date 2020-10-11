@@ -10,7 +10,7 @@ public:
 	Godunov();
 	~Godunov();
 
-	Variables<double> solver_riman(Variables<double> U_L, Variables<double> U_R);
+	Variables<double> Godunov::solveRiemannProblem(const Discontinuity<Variables<double>> &u);
 	Variables<Array<double>*> solve();
 	Response init—omputationalGrid(const —omputationalGrid &grid, double maxTime);
 	void solver(Array<double> &ro, Array<double> &u, Array<double> &p, int n1);
@@ -33,4 +33,3 @@ public:
 		}
 	}
 };
-
